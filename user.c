@@ -33,7 +33,7 @@ int prepare_socket()
     hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
     hints.ai_flags = AI_PASSIVE; // fill in my IP for me
 
-    if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0) {
+    if ((status = getaddrinfo("127.0.0.1", NULL, &hints, &res)) != 0) {
         fprintf(stderr, "gai error: %s\n", gai_strerror(status));
         exit(1);
     }
