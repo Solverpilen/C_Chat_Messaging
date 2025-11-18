@@ -15,16 +15,18 @@ int main(int argc, char *argv[])
 void connect_to_server()
 {
     int s;
+    struct addrinfo *res;
 
-    s = prepare_socket()
+    s = prepare_socket(res);
+    connect(s, res->ai_addr, res->ai_addrlen);
 
+    freeaddrinfo(res);
 }
 
-int prepare_socket()
+int prepare_socket(struct addrinfo *res)
 {
     int status;
-    struct addrinfo hints, *res, *p;
-    struct addrinfo *servinfo; // will point to the results
+    struct addrinfo hints, *p;
     char ipstr[INET6_ADDRSTRLEN];
     int s;
 
@@ -62,8 +64,7 @@ int prepare_socket()
         printf(" %s: %s\n", ipver, ipstr);
     }
 
-    s = socket(res->ai_family, res->ai_socktype. res->ai_protocol);
-    freeaddrinfo(res); // free the linked-list
+    s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
     return s;
 
