@@ -17,7 +17,7 @@ void connect_to_server()
     int s;
     struct addrinfo *res;
 
-    s = prepare_socket(res);
+    s = prepare_socket(&res);
     connect(s, res->ai_addr, res->ai_addrlen);
 
     freeaddrinfo(res);
