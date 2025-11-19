@@ -6,23 +6,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-
-int main(int argc, char *argv[]) 
-{
-
-}
-
-void connect_to_server()
-{
-    int s;
-    struct addrinfo *res;
-
-    s = prepare_socket(&res);
-    connect(s, res->ai_addr, res->ai_addrlen);
-
-    freeaddrinfo(res);
-}
-
 int prepare_socket(struct addrinfo *res)
 {
     int status;
@@ -68,4 +51,15 @@ int prepare_socket(struct addrinfo *res)
 
     return s;
 
+}
+
+void connect_to_machine(char *addr)
+{
+    int s;
+    struct addrinfo *res;
+
+    s = prepare_socket(&res);
+    connect(s, res->ai_addr, res->ai_addrlen);
+
+    freeaddrinfo(res);
 }
