@@ -5,6 +5,8 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include "user.h"
+
 
 int prepare_socket(struct addrinfo *res)
 {
@@ -53,13 +55,13 @@ int prepare_socket(struct addrinfo *res)
 
 }
 
-void connect_to_machine(char *addr)
+void connect_to_machine(struct user *user)
 {
     int s;
     struct addrinfo *res;
 
     s = prepare_socket(&res);
-    connect(s, res->ai_addr, res->ai_addrlen);
+    connect(s, user->s->ai_addr, res->ai_addrlen);
 
     freeaddrinfo(res);
 }
