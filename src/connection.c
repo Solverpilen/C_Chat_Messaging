@@ -58,20 +58,22 @@ static int connection_prepare_socket(struct addrinfo *res)
 }
 
 
-static int connection_connect_to_server(struct connection *connection, user *user)
+int connection_connect_to_machine(struct connection *connection, struct machine *machine)
 {
     int s;
 
-    s = connection_prepare_socket(user->address_info);
-    return connect(s, user->address_info->ai_addr, user->address_info->ai_addrlen);
+    s = connection_prepare_socket(machine->address_info);
+    return connect(s, machine->address_info->ai_addr, machine->address_info->ai_addrlen);
 
 }
 
 //void connection_send_msg()
 
-void connection_init(connection *self)
+void connection_init(struct connection *self, struct machine *machine)
 {
     self->prepare_socket = connection_prepare_socket;
-    self->connect_to_server = connection_connect_to_server;
+    self->connect_to_machine = connection_connect_to_machine;
+
+    self->connect_to_machine(&self, &machine);
     //self->send_msg = connection_send_msg;
 }

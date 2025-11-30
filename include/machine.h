@@ -5,21 +5,30 @@
 #include <netdb.h>
 #include "connection.h"
 
-#define USERNAME_SIZE 30
 
-typedef struct {
+typedef struct machine {
 
-    char user_name[USERNAME_SIZE];
+    char *user_name;
     struct sockaddr_in *ipv4;
-    struct sockaddrin6 *ipv6;
+    struct sockaddr_in6 *ipv6;
     struct addrinfo *address_info;
     void *users;
-    connection *connection;
+    struct connection *connection;
 
     void (*select_machine)(char *user_name);
 
-} user;
+} machine;
 
-void * user_select_machine(char *user_name);
+void * machine_select_machine(char *user_name);
+
+struct machine *machine_init(
+
+    machine *self, 
+    char *user_name, 
+    struct sockaddr_in *ipv4,
+    struct sockaddr_in6 *ipv6,
+    struct addrinfo *address_info,
+    struct connection *connection,
+);
 
 #endif

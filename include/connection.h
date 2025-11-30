@@ -1,16 +1,15 @@
 #ifndef CONNECTION.H
 #define CONNECTION.H
 
-typedef struct {
+typedef struct connection {
 
     void (*prepare_socket)(struct addrinfo *res);
-    void (*connect_to_server)(struct user *user);
-    void (*init)(connection *connection);
+    void (*connect_to_machine)(struct user *user, struct machine *machine);
 
 } connection;
 
 static int connection_prepare_socket(struct addrinfo *res);
-static int connection_connect_to_server(connection *connection, user *user);
-void connection_init(connection *self);
+int connection_connect_to_machine(struct connection *connection, struct machine *machine);
+void connection_init(struct connection *self);
 
 #endif

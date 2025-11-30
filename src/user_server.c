@@ -1,4 +1,3 @@
-#include "machine.h"
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -16,5 +15,5 @@ struct user user_select_machine(char *user_name)
 
 void user_init(user *user)
 {
-    user
+    
 }
