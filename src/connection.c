@@ -5,26 +5,15 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include "machine.h"
+#include "connection.h"
 
+#define SERVER_ADDR "192.168.1.1"
 
-int main(int argc, char *argv[]) 
-{
-
-}
-
-void connect_to_server()
-{
-    int s;
-
-    s = prepare_socket()
-
-}
-
-int prepare_socket()
+static int connection_prepare_socket(struct addrinfo *res)
 {
     int status;
-    struct addrinfo hints, *res, *p;
-    struct addrinfo *servinfo; // will point to the results
+    struct addrinfo hints, *p;
     char ipstr[INET6_ADDRSTRLEN];
     int s;
 
@@ -33,7 +22,7 @@ int prepare_socket()
     hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
     hints.ai_flags = AI_PASSIVE; // fill in my IP for me
 
-    if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0) {
+    if ((status = getaddrinfo(SERVER_ADDR, NULL, &hints, &res)) != 0) {
         fprintf(stderr, "gai error: %s\n", gai_strerror(status));
         exit(1);
     }
@@ -62,9 +51,29 @@ int prepare_socket()
         printf(" %s: %s\n", ipver, ipstr);
     }
 
-    s = socket(res->ai_family, res->ai_socktype. res->ai_protocol);
-    freeaddrinfo(res); // free the linked-list
+    s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
     return s;
 
+}
+
+
+int connection_connect_to_machine(struct connection *connection, struct machine *machine)
+{
+    int s;
+
+    s = connection_prepare_socket(machine->address_info);
+    return connect(s, machine->address_info->ai_addr, machine->address_info->ai_addrlen);
+
+}
+
+//void connection_send_msg()
+
+void connection_init(struct connection *self, struct machine *machine)
+{
+    self->prepare_socket = connection_prepare_socket;
+    self->connect_to_machine = connection_connect_to_machine;
+
+    self->connect_to_machine(&self, &machine);
+    //self->send_msg = connection_send_msg;
 }
