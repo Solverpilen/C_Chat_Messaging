@@ -7,11 +7,16 @@ static void * user_select_machine(char *user_name, machine *self)
 {
     if(self->users)
     {
-        for(int i; i < (sizeof(self->users) / sizeof(self->users[0])); i++) 
+        char ** users = (char **) self->users;
+        for(int i = 0; users[i] != NULL; i++) 
         {
-            if user_name == self->users[]
+            if (strcmp(user_name, users[i]) == 0)
+            {
+                return user_name;
+            }
         }
     }
+    return NULL;
 }
 
 struct machine * machine_init(
@@ -49,13 +54,18 @@ struct machine * machine_init(
 
     self->select_machine = user_select_machine;
 
-    char *users[20][30] = {
+    // TODO: Remove *users 
+
+    char *users[] = {
         "SERVER",
         "James",
-        "Peter"
+        "Peter",
+        NULL
     };
 
     self->users = users;
+    self->users = (char **) self->users;
+
     return m;
     
 }
