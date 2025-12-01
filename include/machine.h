@@ -28,7 +28,7 @@ struct machine *machine_init(
     struct sockaddr_in *ipv4,
     struct sockaddr_in6 *ipv6,
     struct addrinfo *address_info,
-    struct connection *connection,
+    struct connection *connection
 );
 
 #endif
