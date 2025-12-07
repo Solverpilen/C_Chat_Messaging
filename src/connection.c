@@ -7,10 +7,9 @@
 #include <netinet/in.h>
 #include "machine.h"
 #include "connection.h"
+#include <stdlib.h>
 
-#define SERVER_ADDR "192.168.1.1"
-
-static int connection_prepare_socket(struct addrinfo *res)
+static int connection_prepare_socket(struct addrinfo *res, char * ip)
 {
     int status;
     struct addrinfo hints, *p;
@@ -22,7 +21,7 @@ static int connection_prepare_socket(struct addrinfo *res)
     hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
     hints.ai_flags = AI_PASSIVE; // fill in my IP for me
 
-    if ((status = getaddrinfo(SERVER_ADDR, NULL, &hints, &res)) != 0) {
+    if ((status = getaddrinfo(ip, NULL, &hints, &res)) != 0) {
         fprintf(stderr, "gai error: %s\n", gai_strerror(status));
         exit(1);
     }
@@ -58,22 +57,43 @@ static int connection_prepare_socket(struct addrinfo *res)
 }
 
 
-int connection_connect_to_machine(struct connection *connection, struct machine *machine)
+static int connection_connect_to_machine(struct connection *self_connection, struct machine *self_machine, char * target_ip)
 {
-    int s;
+    int sockfd;
 
-    s = connection_prepare_socket(machine->address_info);
-    return connect(s, machine->address_info->ai_addr, machine->address_info->ai_addrlen);
+    sockfd = connection_prepare_socket(self_connection->res, target_ip);
+
+    if(connect(sockfd, self_machine->address_info->ai_addr, self_machine->address_info->ai_addrlen) == 0)
+    {
+        freeaddrinfo(self_connection->res);
+        return sockfd;
+    }
+    else
+    {
+        perror("connect");
+        close(sockfd);
+        return -1;
+    }
 
 }
 
 //void connection_send_msg()
 
-void connection_init(struct connection *self, struct machine *machine)
+connection * connection_init(struct machine *self_machine, char * target_ip)
 {
-    self->prepare_socket = connection_prepare_socket;
-    self->connect_to_machine = connection_connect_to_machine;
+    int connection_status;
+    connection *c = malloc(sizeof(connection));
 
-    self->connect_to_machine(&self, &machine);
+    c->connect_to_machine = connection_connect_to_machine;
+    connection_status = (int) c->connect_to_machine(&c, &self_machine, target_ip);
+    
+    if(connection_status != -1)
+    {
+        c->sockfd = connection_status;
+        return c;
+    }
+
+    return NULL;
+
     //self->send_msg = connection_send_msg;
 }
