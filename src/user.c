@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static void * user_select_machine(char *user_name, machine *self)
+void * user_select_machine(char *user_name, machine *self)
 {
     if(self->users)
     {
@@ -19,32 +19,27 @@ static void * user_select_machine(char *user_name, machine *self)
     return NULL;
 }
 
-struct machine * machine_init(
-
-    struct addrinfo *address_info,
-    struct connection *connection
-)
+struct machine * machine_init(const char * user_name)
 {
-    machine *m = malloc(sizeof(machine));
+    machine *u = malloc(sizeof(machine));
+    if(!u) return NULL;
 
-    m->address_info = address_info;
-    m->connection = connection;
+    u->user_name = strdup(user_name);
+    u->address_info = NULL;
+    u->connection = NULL;
 
-    m->select_machine = user_select_machine;
+    u->select_machine = user_select_machine;
+    
+    char **user_list = malloc(sizeof(char*) * 4);
 
-    // TODO: Remove *users 
+    user_list[0] = strdup("SERVER");
+    user_list[1] = strdup("James");
+    user_list[2] = strdup("Peter");
+    user_list[3] = NULL; 
 
-    char *users[] = {
-        "SERVER",
-        "James",
-        "Peter",
-        NULL
-    };
+    u->users = user_list;
 
-    m->users = users;
-    m->users = (char **) m->users;
-
-    return m;
+    return u;
     
 }
 
