@@ -9,24 +9,23 @@
 #include "connection.h"
 #include <stdlib.h>
 
-static int connection_prepare_socket(struct addrinfo *res, char * ip)
+static int connection_prepare_socket(struct addrinfo **res, char * ip)
 {
     int status;
     struct addrinfo hints, *p;
     char ipstr[INET6_ADDRSTRLEN];
-    int s;
+    int sockfd;
 
     memset(&hints, 0, sizeof hints); // make sure the struct is empty
     hints.ai_family = AF_UNSPEC; // don't care IPv4 or IPv6
     hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
-    hints.ai_flags = AI_PASSIVE; // fill in my IP for me
 
-    if ((status = getaddrinfo(ip, NULL, &hints, &res)) != 0) {
+    if ((status = getaddrinfo(ip, 3490, &hints, &res)) != 0) {
         fprintf(stderr, "gai error: %s\n", gai_strerror(status));
-        exit(1);
+        return -1;
     }
 
-    for(p = res; p != NULL; p->ai_next) 
+    for(p = res; p != NULL; p = p->ai_next) 
     {
         void *addr;
         char *ipver;
@@ -50,50 +49,58 @@ static int connection_prepare_socket(struct addrinfo *res, char * ip)
         printf(" %s: %s\n", ipver, ipstr);
     }
 
-    s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    sockfd = socket((*res)->ai_family, (*res)->ai_socktype, (*res)->ai_protocol);
+    if(sockfd == -1)
+    {
+        perror("socket");
+        freeaddrinfo(*res);
+        return -1;
+    }
 
-    return s;
+    return sockfd;
 
 }
 
 
-static int connection_connect_to_machine(struct connection *self_connection, struct machine *self_machine, char * target_ip)
+static int connection_connect_to_machine(struct connection *self, struct machine *machine, const char * target_ip)
 {
     int sockfd;
 
-    sockfd = connection_prepare_socket(self_connection->res, target_ip);
+    self->sockfd = connection_prepare_socket(self->res, target_ip);
 
-    if(connect(sockfd, self_machine->address_info->ai_addr, self_machine->address_info->ai_addrlen) == 0)
-    {
-        freeaddrinfo(self_connection->res);
-        return sockfd;
-    }
-    else
+    if(connect(self->sockfd, self->res->ai_addr, self->res->ai_addrlen) == -1)
     {
         perror("connect");
-        close(sockfd);
+        close(self->sockfd);
+        freeaddrinfo(self->res);
         return -1;
     }
-
+    
+    freeaddrinfo(self->res);
+    return self->sockfd;
 }
 
 //void connection_send_msg()
 
-connection * connection_init(struct machine *self_machine, char * target_ip)
+connection * connection_init(struct machine *machine, char * target_ip)
 {
     int connection_status;
     connection *c = malloc(sizeof(connection));
+    if(!c) return NULL;
+
+    c->res = NULL;
+    c->sockfd = -1;
 
     c->connect_to_machine = connection_connect_to_machine;
-    connection_status = (int) c->connect_to_machine(&c, &self_machine, target_ip);
     
-    if(connection_status != -1)
+    if(c->connect_to_machine(c, machine, target_ip) == -1)
     {
-        c->sockfd = connection_status;
-        return c;
+        free(c);
+        return NULL;
     }
 
-    return NULL;
+    printf("CONNECTION: Suceeded \n");
+    return c;
 
     //self->send_msg = connection_send_msg;
 }
