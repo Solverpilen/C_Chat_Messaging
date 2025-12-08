@@ -9,26 +9,16 @@
 typedef struct machine {
 
     char *user_name;
-    struct sockaddr_in *ipv4;
-    struct sockaddr_in6 *ipv6;
     struct addrinfo *address_info;
     void *users;
     struct connection *connection;
 
-    void (*select_machine)(char *user_name);
+    void (*select_machine)(char *user_name, machine *machine);
 
 } machine;
 
 void * machine_select_machine(char *user_name);
 
-struct machine *machine_init(
-
-    machine *self, 
-    char *user_name, 
-    struct sockaddr_in *ipv4,
-    struct sockaddr_in6 *ipv6,
-    struct addrinfo *address_info,
-    struct connection *connection
-);
+struct machine *machine_init(char *user_name);
 
 #endif
